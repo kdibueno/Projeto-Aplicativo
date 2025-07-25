@@ -257,108 +257,45 @@ function PomodoroTimer() {
   );
 }
 
-export default function FullstackPlanApp() {
-  const [completed, setCompleted] = useLocalStorage("completed", {
-    desenvolvedor: Array(plans.desenvolvedor.length).fill(0),
-    fitness: Array(plans.fitness.length).fill(0),
-  });
-  const [reminder, setReminder] = useLocalStorage("reminder", "");
-  const [theme, setTheme] = useLocalStorage("theme", "dark");
-
-  // Alterna entre progresso 0 e 100 para cada semana
-  const toggleTask = (section, weekIndex) => {
-    setCompleted((prev) => {
-      const newProgress = { ...prev };
-      newProgress[section] = [...newProgress[section]]; // clonar array para React detectar mudança
-      newProgress[section][weekIndex] = newProgress[section][weekIndex] === 100 ? 0 : 100;
-      return newProgress;
-    });
-  };
-
-  // Atualiza classe do tema dark
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [theme]);
-
-  // Pede permissão de notificação
-  useEffect(() => {
-    requestNotificationPermission();
-  }, []);
-
-  // Verifica lembrete a cada minuto e dispara notificação se horário bate
-  useEffect(() => {
-    if (!reminder.trim()) return;
-
-    const checkReminder = () => {
-      const now = new Date();
-      // espera string no formato "HH:mm" (ex: "20:00")
-      const regex = /(\d{1,2}):(\d{2})/;
-      const match = reminder.match(regex);
-      if (!match) return;
-      const [_, h, m] = match;
-      if (now.getHours() === Number(h) && now.getMinutes() === Number(m)) {
-        sendReminderNotification(`Lembrete: ${reminder}`);
-      }
-    };
-
-    const interval = setInterval(checkReminder, 60 * 1000);
-    return () => clearInterval(interval);
-  }, [reminder]);
-
-  return (
-    <div className="p-4 max-w-2xl mx-auto space-y-6 transition-colors duration-300 bg-zinc-100 dark:bg-zinc-900 min-h-screen">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex justify-between items-center"
-      >
-        <h1 className="text-3xl font-bold">Meus Projetos de Vida</h1>
+return (
+    <div className="p-4 max-w-2xl mx-auto space-y-6 transition-colors duration-300 bg-zinc-900 min-h-screen">
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-white">Meus Projetos de Vida</h1>
         <Button variant="ghost" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-          {theme === "dark" ? <Sun /> : <Moon />}
+          {theme === "dark" ? <Sun className="text-white" /> : <Moon className="text-black" />}
         </Button>
       </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="flex flex-col sm:flex-row items-center justify-between gap-2"
-      >
-        <label className="text-sm">Definir lembrete (HH:mm):</label>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="flex flex-col sm:flex-row items-center justify-between gap-2">
+        <label className="text-sm text-white">Definir lembrete:</label>
         <div className="flex items-center gap-2 w-full">
           <Input
             type="text"
-            placeholder="Ex: 20:00"
+            placeholder="Ex: Estudar às 20h diariamente"
             value={reminder}
             onChange={(e) => setReminder(e.target.value)}
           />
-          <Bell className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
+          <Bell className="w-4 h-4 text-zinc-300" />
         </div>
       </motion.div>
 
       <PomodoroTimer />
 
       <Tabs defaultValue="desenvolvedor" className="w-full">
-        <TabsList className="grid grid-cols-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 p-1">
-          <TabsTrigger value="desenvolvedor">Projeto Desenvolvedor</TabsTrigger>
-          <TabsTrigger value="fitness">Projeto Fitness</TabsTrigger>
+        <TabsList className="grid grid-cols-2">
+          <TabsTrigger value="desenvolvedor" className="text-white">Projeto Desenvolvedor</TabsTrigger>
+          <TabsTrigger value="fitness" className="text-white">Projeto Fitness</TabsTrigger>
         </TabsList>
 
         {Object.entries(plans).map(([section, weeks]) => (
           <TabsContent key={section} value={section}>
             <AnimatePresence>
               {weeks.map((week, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Card className="rounded-2xl shadow-md mt-4 dark:bg-zinc-900">
+                <motion.div key={index} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+                  <Card className="rounded-2xl shadow-md mt-4 bg-zinc-800">
                     <CardContent className="p-4">
-                      <h2 className="text-xl font-semibold mb-2">{week.week}</h2>
-                      <p className="mb-2 text-muted-foreground">{week.focus}</p>
+                      <h2 className="text-xl font-semibold mb-2 text-white">{week.week}</h2>
+                      <p className="mb-2 text-white">{week.focus}</p>
                       <ul className="space-y-1 mb-4">
                         {week.tasks.map((task, taskIndex) => (
                           <li key={taskIndex} className="flex items-center gap-2">
@@ -367,17 +304,13 @@ export default function FullstackPlanApp() {
                               onChange={() => toggleTask(section, index)}
                               checked={completed[section][index] === 100}
                             />
-                            <span className="flex items-center gap-1 select-none">
+                            <span className="flex items-center gap-1 text-white">
                               <CheckCircle2 className="w-4 h-4 text-green-500" /> {task}
                             </span>
                           </li>
                         ))}
                       </ul>
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${completed[section][index]}%` }}
-                        transition={{ duration: 0.6 }}
-                      >
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${completed[section][index]}%` }} transition={{ duration: 0.6 }}>
                         <Progress value={completed[section][index]} />
                       </motion.div>
                     </CardContent>
